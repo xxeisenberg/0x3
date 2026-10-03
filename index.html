@@ -1,34 +1,36 @@
 <!doctype html>
-<html></html>
-lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>0x3 // Hex Editor</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>Raw Hex Editor</header>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>0x3 // Hex Editor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>Raw Hex Editor</header>
 
-  <main class="workspace">
-    <section class="panel editor-panel">
-      <div class="toolbar">
-        <button id="btn-corrupt" class="btn btn-danger">Glitch [Space]</button>
-        <button id="btn-reset" class="btn">Reset [R]</button>
-        <button id="btn-download" class="btn btn-seccondary">Export</button>
-      </div>
-      <div id="hex-container" tabindex="0"></div>
-    </section>
-
-    <section class="panel preview-panel">
-      <div class="preview-box">
-        <img id="preview-img" alt="" />
-        <div id="dropzone">
-          <p>Drop an image file here</p>
+    <main class="workspace">
+      <section class="panel editor-panel">
+        <div class="toolbar">
+          <button id="btn-corrupt" class="btn btn-danger">
+            Glitch [Space]
+          </button>
+          <button id="btn-reset" class="btn">Reset [R]</button>
+          <button id="btn-download" class="btn btn-seccondary">Export</button>
         </div>
-      </div>
-    </section>
-  </main>
+        <div id="hex-container" tabindex="0"></div>
+      </section>
 
-  <script src="app.js" defer></script>
-</body>
+      <section class="panel preview-panel">
+        <div class="preview-box">
+          <img id="preview-img" alt="" />
+          <div id="dropzone">
+            <p>Drop an image file here</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
