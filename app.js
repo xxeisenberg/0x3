@@ -3,9 +3,15 @@ const $ = (id) => document.getElementById(id);
 const glitchBtn = $("btn-corrupt");
 const resetBtn = $("btn-reset");
 const exportBtn = $("btn-download");
+const uploadBtn = $("btn-upload");
+const fileInput = $("file-input");
 const hexBox = $("hex-container");
 const preview = $("preview-img");
 const dropzone = $("dropzone");
+const pumpkinIcon = $("pumpkin-icon");
+const sampleBtns = document.querySelectorAll(".sample-btn[data-src]");
+
+const glitchSounds = [new Audio("glitch1.mp3"), new Audio("glitch2.mp3")];
 
 let fileName = "glitch.jpg";
 let orig = null;
@@ -14,17 +20,31 @@ let lastValid = null;
 let dirty = new Set();
 let activeUrl = null;
 
-["dragenter", "dragover", "dragleave", "drop"].forEach((ev) => {
-  window.addEventListener(ev, (e) => e.preventDefault());
-});
+function playRandomGlitch(isTinyClick = false) {
+  const sound = glitchSounds[Math.floor(Math.random() * glitchSounds.length)];
+  if (!sound) return;
 
-window.addEventListener("drop", async (e) => {
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
+  sound.currentTime = 0;
+  sound.playbackRate = isTinyClick
+    ? 1.7 + Math.random() * 0.4
+    : 0.85 + Math.random() * 0.3;
+  sound.volume = isTinyClick ? 0.3 : 0.85;
 
-  fileName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+  sound.play().catch(() => {});
+}
 
-  const jpegBlob = await convertToJpeg(file);
+function twitchPumpkin() {
+  if (!pumpkinIcon) return;
+  pumpkinIcon.classList.remove("twitch");
+  void pumpkinIcon.offsetWidth;
+  pumpkinIcon.classList.add("twitch");
+  setTimeout(() => pumpkinIcon.classList.remove("twitch"), 120);
+}
+
+async function loadFromBlobOrFile(blob, name = "sample.jpg") {
+  fileName = name.replace(/\.[^/.]+$/, "") + ".jpg";
+
+  const jpegBlob = await convertToJpeg(blob);
   const raw = await jpegBlob.arrayBuffer();
 
   orig = new Uint8Array(raw);
@@ -36,6 +56,47 @@ window.addEventListener("drop", async (e) => {
 
   renderHex(0, 512);
   syncPreview();
+}
+
+async function loadSampleUrl(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Sample missing");
+    const blob = await res.blob();
+    const cleanName = url.split("/").pop() || "sample.jpg";
+    await loadFromBlobOrFile(blob, cleanName);
+  } catch (err) {
+    console.warn("Could not load sample image:", url);
+  }
+}
+
+sampleBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    sampleBtns.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadSampleUrl(btn.dataset.src);
+  });
+});
+
+uploadBtn.onclick = () => fileInput.click();
+dropzone.onclick = () => fileInput.click();
+
+fileInput.onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  sampleBtns.forEach((b) => b.classList.remove("active"));
+  loadFromBlobOrFile(file, file.name);
+};
+
+["dragenter", "dragover", "dragleave", "drop"].forEach((ev) => {
+  window.addEventListener(ev, (e) => e.preventDefault());
+});
+
+window.addEventListener("drop", (e) => {
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  sampleBtns.forEach((b) => b.classList.remove("active"));
+  loadFromBlobOrFile(file, file.name);
 });
 
 function convertToJpeg(file) {
@@ -93,10 +154,11 @@ function syncPreview() {
 function renderHex(offset = 0, len = 512) {
   if (!buf || !hexBox) return;
 
-  const max = Math.min(offset + len, buf.length);
+  const start = offset === 0 ? getSafeOffset() : offset;
+  const max = Math.min(start + len, buf.length);
   const rows = [];
 
-  for (let i = offset; i < max; i += 16) {
+  for (let i = start; i < max; i += 16) {
     const rowAddr = i.toString(16).padStart(8, "0").toUpperCase();
     let hexParts = [];
     let asciiParts = [];
@@ -134,12 +196,16 @@ function renderHex(offset = 0, len = 512) {
 function corrupt(count = 8) {
   if (!buf) return;
 
+  playRandomGlitch(false);
+  twitchPumpkin();
+
   const start = getSafeOffset();
   const end = buf.length - 64;
   if (end <= start) return;
 
   for (let n = 0; n < count; n++) {
-    const target = start + Math.floor(Math.random() * (end - start));
+    const rangeEnd = n < count / 2 ? Math.min(start + 512, end) : end;
+    const target = start + Math.floor(Math.random() * (rangeEnd - start));
 
     if (
       buf[target] === 0xff ||
@@ -164,6 +230,9 @@ function corrupt(count = 8) {
 hexBox.addEventListener("click", (e) => {
   const cell = e.target.closest(".byte");
   if (!cell || !cell.dataset.idx) return;
+
+  playRandomGlitch(true);
+  twitchPumpkin();
 
   const idx = Number(cell.dataset.idx);
   let next = (buf[idx] + 1) & 0xff;
@@ -206,3 +275,7 @@ window.addEventListener("keydown", (e) => {
     resetBtn.click();
   }
 });
+
+if (sampleBtns.length > 0) {
+  loadSampleUrl(sampleBtns[0].dataset.src);
+}

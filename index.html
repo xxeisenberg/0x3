@@ -3,20 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>0x3 // Hex Editor</title>
+    <title>0x3AM // hexcorrupt</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>Raw Hex Editor</header>
+    <header>
+      <img id="pumpkin-icon" src="pumpkin.png" alt="jack-o-lantern" />
+      <span>Cursed Hex Editor</span>
+    </header>
 
     <main class="workspace">
       <section class="panel editor-panel">
         <div class="toolbar">
           <button id="btn-corrupt" class="btn btn-danger">
-            Glitch [Space]
+            corrupt [Space]
           </button>
-          <button id="btn-reset" class="btn">Reset [R]</button>
-          <button id="btn-download" class="btn btn-seccondary">Export</button>
+          <button id="btn-reset" class="btn">restore [R]</button>
+          <button id="btn-download" class="btn btn-seccondary">
+            save .jpg
+          </button>
+
+          <div class="samples">
+            <span class="samples-label">samples:</span>
+            <button class="sample-btn active" data-src="sample1.jpg">
+              01_porch
+            </button>
+            <button class="sample-btn" data-src="sample2.jpg">02_woods</button>
+            <button class="sample-btn" data-src="sample3.jpg">03_mask</button>
+            <button id="btn-upload" class="sample-btn">+ open file</button>
+            <input type="file" id="file-input" accept="image/*" hidden />
+          </div>
         </div>
         <div id="hex-container" tabindex="0"></div>
       </section>
@@ -25,7 +41,7 @@
         <div class="preview-box">
           <img id="preview-img" alt="" />
           <div id="dropzone">
-            <p>Drop an image file here</p>
+            <p>Drop an image file here, or pick a sample on the left</p>
           </div>
         </div>
       </section>
